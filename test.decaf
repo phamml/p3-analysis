@@ -1,21 +1,5 @@
-int x;
-int y[2];
-
-def int abs (int v)
-{
-    if (v < 0) {
-        int a;
-        a = -v; 
-        return a;
-
-    } else {
-        return v;
-    }
-}
-
-def int main ()
-{
-    int num;
-    num = abs(-8);
-    return num;
+def int main() { 
+    int i; 
+    i = true+4; 
+    return 0;
 }
