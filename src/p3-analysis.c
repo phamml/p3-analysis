@@ -176,7 +176,11 @@ void Analysis_postvisit_continue (NodeVisitor* visitor, ASTNode* node)
 // }
 
 ErrorList* analyze (ASTNode* tree)
-{    
+{
+    if (tree == NULL) {
+        Error_throw_printf("The AST tree is NULL\n");
+    }
+    
     /* allocate analysis structures */
     NodeVisitor* v = NodeVisitor_new();
     v->data = (void*) AnalysisData_new();
@@ -196,9 +200,6 @@ ErrorList* analyze (ASTNode* tree)
     // v->postvisit_unaryop = Analysis_postvisit_unary_op;
 
     /* perform analysis, save error list, clean up, and return errors */
-    if (tree == NULL) {
-        Error_throw_printf("The AST tree is NULL\n");
-    }
     NodeVisitor_traverse(v, tree);
     ErrorList* errors = ((AnalysisData*)v->data)->errors;
     NodeVisitor_free(v);

@@ -121,7 +121,7 @@ int main(int argc, char** argv)
     NodeVisitor_traverse_and_free(BuildSymbolTablesVisitor_new(), tree);
 
     /* PROJECT 3: analysis */
-    ErrorList* errors = analyze(tree);
+    ErrorList* errors = analyze(NULL);
 
     /* output */
     FOR_EACH(AnalysisError*, err, errors) {
