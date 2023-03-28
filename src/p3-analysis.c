@@ -188,7 +188,8 @@ void Analysis_postvisit_continue (NodeVisitor* visitor, ASTNode* node)
 ErrorList* analyze (ASTNode* tree)
 {
     if (tree == NULL) {
-        Error_throw_printf("The AST tree is NULL\n");
+        fprintf(stderr, "Error: tree is null\n");
+        exit(0);
     }
     
     /* allocate analysis structures */
