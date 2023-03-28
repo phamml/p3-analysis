@@ -1,4 +1,0 @@
---- outputs/D_undefined_var.txt	2023-03-27 21:01:32.451995346 -0400
-+++ expected/D_undefined_var.txt	2023-03-26 20:00:58.263153733 -0400
-@@ -0,0 +1 @@
-+Symbol 'a' undefined on line 3
