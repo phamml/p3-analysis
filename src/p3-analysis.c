@@ -1,6 +1,7 @@
 /**
  * @file p3-analysis.c
  * @brief Compiler phase 3: static analysis
+ * @author Mia Pham and Tesha Yeboah
  */
 #include "p3-analysis.h"
 
