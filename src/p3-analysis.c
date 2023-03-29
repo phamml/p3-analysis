@@ -87,6 +87,44 @@ Symbol* lookup_symbol_with_reporting(NodeVisitor* visitor, ASTNode* node, const 
  */
 #define GET_INFERRED_TYPE(N) (DecafType)(long)ASTNode_get_attribute(N, "type")
 
+/**
+ * Helper functions
+ */
+// bool is_keyword(char* id)
+// {
+//     bool flag = false;
+//     if (strcmp(id, "def") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "if") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "else") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "while") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "return") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "break") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "continue") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "int") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "bool") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "void") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "true") == 0) {
+//         flag = true;
+//     } else if (strcmp(id, "false") == 0) {
+//         flag = true;
+//     }
+//     return flag;
+// }
+
+/**
+ * Functions for static analysis
+ */
+
 void Analysis_previsit_literal (NodeVisitor* visitor, ASTNode* node)
 {
     SET_INFERRED_TYPE(node->literal.type);
@@ -97,6 +135,8 @@ void Analysis_previsit_unaryop (NodeVisitor* visitor, ASTNode* node)
     UnaryOpType op = node->unaryop.operator;
     switch (op) {
         case NEGOP:
+        SET_INFERRED_TYPE(INT);
+                break;
         case NOTOP:
             SET_INFERRED_TYPE(BOOL);
                 break;
@@ -108,6 +148,7 @@ void Analysis_postvisit_unaryop (NodeVisitor* visitor, ASTNode* node)
     const char* bin_type = DecafType_to_string(GET_INFERRED_TYPE(node));
     const char* child_type = DecafType_to_string(GET_INFERRED_TYPE(node->unaryop.child));
 
+    // child must be same type as unary op type
     if (strcmp(bin_type, child_type) != 0) {
         ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
             bin_type, child_type, node->source_line);
@@ -145,35 +186,70 @@ void Analysis_postvisit_binaryop (NodeVisitor* visitor, ASTNode* node)
     const char* bin_type = DecafType_to_string(GET_INFERRED_TYPE(node));
     const char* left_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.left));
     const char* right_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.right));
-
-    if (strcmp(bin_type, left_type) != 0) {
-        ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
-            bin_type, left_type, node->source_line);
-        return;
-    } else if (strcmp(bin_type, right_type) != 0) {
-        ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
-            bin_type, right_type, node->source_line);
-        return;
+    BinaryOpType op = node->binaryop.operator;
+    switch (op) {
+        // left and right child must be same type as binary op type
+        case OROP:
+        case ANDOP:
+        case EQOP:
+        case NEQOP:
+        case ADDOP:
+        case SUBOP:
+        case MULOP:
+        case DIVOP:
+        case MODOP:
+            if (strcmp(bin_type, left_type) != 0) {
+                ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
+                    bin_type, left_type, node->source_line);
+                return;
+            } else if (strcmp(bin_type, right_type) != 0) {
+                ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
+                    bin_type, right_type, node->source_line);
+                return;
+            }
+            break;
+        // left and right child must be type int 
+        case LTOP:
+        case LEOP:
+        case GEOP:
+        case GTOP:
+            if (strcmp("int", left_type) != 0) {
+                ErrorList_printf(ERROR_LIST, "Type mismatch: int expected but %s found on line %d",
+                    left_type, node->source_line);
+                return;
+            } else if (strcmp("int", right_type) != 0) {
+                ErrorList_printf(ERROR_LIST, "Type mismatch: int expected but %s found on line %d",
+                    right_type, node->source_line);
+                return;
+            }
+            break;
     }
 }
 
 void AnalysisVisitor_previsit_vardecl (NodeVisitor* visitor, ASTNode* node)
 {
+    // no void var allowed
     if (strcmp(DecafType_to_string(node->vardecl.type), "void") == 0) {
         ErrorList_printf(ERROR_LIST, "Void variable '%s' on line %d", 
             node->vardecl.name, node->source_line);
+        return;
     }
 
-    SET_INFERRED_TYPE(node->vardecl.type);
+    //  invalid main var if main var is global
+    int depth = ASTNode_get_int_attribute(node, "depth");
+    if (strcmp(node->vardecl.name, "main") == 0 && depth == 1) {
+        ErrorList_printf(ERROR_LIST, "'main' must be a function");
+    }
 
     // checking for array declarations
     if (node->vardecl.is_array) {
-
         if (node->vardecl.array_length == 0) {
             ErrorList_printf(ERROR_LIST, "Array '%s' on line %d must have positive non-zero lengthArray variable", 
                 node->vardecl.name, node->source_line);
+            return;
         }
     }
+    // SET_INFERRED_TYPE(node->vardecl.type);
 }
 
 void AnalysisVisitor_postvisit_vardecl (NodeVisitor* visitor, ASTNode* node)
@@ -187,9 +263,6 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
     Symbol* symbol = lookup_symbol(node, node->assignment.location->location.name);
     const char* var_type = DecafType_to_string(symbol->type);
     const char* val_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.value));
-    
-    // printf("here\n");
-    // printf("%s\n", val_type);
 
     if (strcmp(var_type, val_type) != 0) {
         ErrorList_printf(ERROR_LIST, "Type mismatch: %s is incompatible with %s on line %d", 
@@ -202,16 +275,19 @@ void AnalysisVisitor_previsit_location(NodeVisitor* visitor, ASTNode* node)
     lookup_symbol_with_reporting(visitor, node, node->location.name);
 }
 
-void AnalysisVisitor_check_main (NodeVisitor* visitor, ASTNode* node)
+void AnalysisVisitor_previsit_program (NodeVisitor* visitor, ASTNode* node)
 {
+    // check that program contains a main function
     Symbol* symbol = lookup_symbol(node, "main");
     if (symbol == NULL) {
         ErrorList_printf(ERROR_LIST, "Program does not contain a 'main' function");
+        return;
     }
 }
 
 void AnalysisVisitor_postvisit_conditional (NodeVisitor* visitor, ASTNode* node)
 {
+    // expression inside if condition must be type bool
     const char* cond_type = DecafType_to_string(GET_INFERRED_TYPE(node->conditional.condition));
     if (strcmp(cond_type, "bool") != 0) {
         ErrorList_printf(ERROR_LIST, "Type mismatch: bool expected but %s found on line %d", 
@@ -226,37 +302,48 @@ void Analysis_previsit_loop (NodeVisitor* visitor, ASTNode* node)
 
 void Analysis_postvisit_loop (NodeVisitor* visitor, ASTNode* node)
 {
+    // expression inside while condition must be type bool
     const char* cond_type = DecafType_to_string(GET_INFERRED_TYPE(node->whileloop.condition));
     if (strcmp(cond_type, "bool") != 0) {
         ErrorList_printf(ERROR_LIST, "Type mismatch: bool expected but %s found on line %d", 
             cond_type, node->source_line);
+        return;
     }
 }
 
 void Analysis_postvisit_break (NodeVisitor* visitor, ASTNode* node)
 {
+    // break must be inside loop
     if (DATA->loop_count < 1) {
         ErrorList_printf(ERROR_LIST, "Invalid 'break' outside of loop on line %d", node->source_line);
+        return;
     }
 }
 
 void Analysis_postvisit_continue (NodeVisitor* visitor, ASTNode* node)
 {
+    // continue must be inside loop
     if (DATA->loop_count < 1) {
         ErrorList_printf(ERROR_LIST, "Invalid 'continue' outside of loop on line %d", node->source_line);
+        return;
     }
 }
 
 void Analysis_previsit_funcdecl (NodeVisitor* visitor, ASTNode* node)
 {
-    // sets inferred type for function return type and param types
-    SET_INFERRED_TYPE(node->funcdecl.return_type);
-    Parameter* curr_param = node->funcdecl.parameters->head;
-    while (curr_param != NULL) {
-        SET_INFERRED_TYPE(curr_param->type);
-        curr_param = curr_param->next;
+    // check that main function has no params
+    if (strcmp(node->funcdecl.name, "main") == 0 && node->funcdecl.parameters->size != 0) {
+        ErrorList_printf(ERROR_LIST, "'main' must take no parameters");
+        return;
     }
-    
+
+    // sets inferred type for function return type and param types
+    // SET_INFERRED_TYPE(node->funcdecl.return_type);
+    // Parameter* curr_param = node->funcdecl.parameters->head;
+    // while (curr_param != NULL) {
+    //     SET_INFERRED_TYPE(curr_param->type);
+    //     curr_param = curr_param->next;
+    // } 
 }
 
 void Analysis_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
@@ -309,12 +396,18 @@ void AnalysisVisitor_postvisit_block (NodeVisitor* visitor, ASTNode* node)
             if (strcmp(s->name, s2->name) == 0) {
                 ErrorList_printf(ERROR_LIST, "Duplicate symbols named '%s' in scope started on line %d",
                     s->name, node->source_line);
-                SymbolTable_free(table);
+                // SymbolTable_free(table);
                 return;
             }
-
         }
     }
+}
+
+void Analysis_postvisit_return (NodeVisitor* visitor, ASTNode* node) 
+{
+    // ASTNode* grandparent = (ASTNode*) ASTNode_get_attribute((ASTNode*) ASTNode_get_attribute(node, "parent"), "parent");
+    // printf("parent=%d", grandparent->type);
+
 }
 
 
@@ -352,7 +445,7 @@ ErrorList* analyze (ASTNode* tree)
     /* BOILERPLATE: TODO: register analysis callbacks */
     v->previsit_vardecl = AnalysisVisitor_previsit_vardecl;
     v->previsit_location = AnalysisVisitor_previsit_location;
-    v->previsit_program = AnalysisVisitor_check_main;
+    v->previsit_program = AnalysisVisitor_previsit_program;
     v->previsit_literal = Analysis_previsit_literal;
     v->previsit_funcdecl = Analysis_previsit_funcdecl;
     v->previsit_binaryop = Analysis_previsit_binaryop;
@@ -369,6 +462,7 @@ ErrorList* analyze (ASTNode* tree)
     v->postvisit_funccall = Analysis_postvisit_funccall;
     v->postvisit_binaryop = Analysis_postvisit_binaryop;
     v->postvisit_unaryop = Analysis_postvisit_unaryop;
+    v->postvisit_return = Analysis_postvisit_return;
 
     /* perform analysis, save error list, clean up, and return errors */
     NodeVisitor_traverse(v, tree);

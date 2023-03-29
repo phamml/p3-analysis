@@ -1,4 +1,3 @@
 Running suite(s): Default
-86%: Checks: 15, Failures: 2, Errors: 0
+93%: Checks: 15, Failures: 1, Errors: 0
 public.c:30:F:Public:C_return_type_mismatch:0: Assertion 'invalid_program("def int main() { return true; }")' failed
-public.c:37:F:Public:A_invalid_main_var:0: Assertion 'invalid_program("int main; def int foo(int a) { return 0; }")' failed

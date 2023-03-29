@@ -1,5 +1,7 @@
-def int main() { 
-    bool i; 
-    i = !5; 
-    return 0;
+int a; 
+def int main() {
+    if (true) {
+        return 0;
+    }
+    return 0; 
 }
