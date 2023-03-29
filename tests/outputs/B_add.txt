@@ -1,3 +1,14 @@
-left: int right: int
-ERROR: No 'type' attribute
-Type mismatch: int is incompatible with ??? on line 4
+Program [line 1]
+SYM TABLE:
+ print_int : (int) -> void
+ print_bool : (bool) -> void
+ print_str : (str) -> void
+ main : () -> int
+
+  FuncDecl name="main" return_type=int parameters={} [line 1]
+  SYM TABLE:
+
+    Block [line 2]
+    SYM TABLE:
+     a : int
+

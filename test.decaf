@@ -1,11 +1,5 @@
 def int main() { 
-    foo(5, true); 
-    while (true) {
-        int a[true];
-    }
+    bool i; 
+    i = !5; 
     return 0;
-}
-
-def void foo(int i, bool b)  { 
-    return; 
 }

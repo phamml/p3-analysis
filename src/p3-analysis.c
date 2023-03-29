@@ -92,11 +92,69 @@ void Analysis_previsit_literal (NodeVisitor* visitor, ASTNode* node)
     SET_INFERRED_TYPE(node->literal.type);
 }
 
+void Analysis_previsit_unaryop (NodeVisitor* visitor, ASTNode* node) 
+{
+    UnaryOpType op = node->unaryop.operator;
+    switch (op) {
+        case NEGOP:
+        case NOTOP:
+            SET_INFERRED_TYPE(BOOL);
+                break;
+    }
+}
+
+void Analysis_postvisit_unaryop (NodeVisitor* visitor, ASTNode* node)
+{
+    const char* bin_type = DecafType_to_string(GET_INFERRED_TYPE(node));
+    const char* child_type = DecafType_to_string(GET_INFERRED_TYPE(node->unaryop.child));
+
+    if (strcmp(bin_type, child_type) != 0) {
+        ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
+            bin_type, child_type, node->source_line);
+        return;
+    }
+}
+
+void Analysis_previsit_binaryop (NodeVisitor* visitor, ASTNode* node)
+{
+    // visitor->previsit_literal = Analysis_previsit_literal;
+    BinaryOpType op = node->binaryop.operator;
+    switch (op) {
+        case OROP:
+        case ANDOP:
+        case EQOP:
+        case NEQOP:
+        case LTOP:
+        case LEOP:
+        case GEOP:
+        case GTOP:
+            SET_INFERRED_TYPE(BOOL);
+                break;
+        case ADDOP:
+        case SUBOP:
+        case MULOP:
+        case DIVOP:
+        case MODOP:
+            SET_INFERRED_TYPE(INT);
+            break;
+    }
+}
+
 void Analysis_postvisit_binaryop (NodeVisitor* visitor, ASTNode* node)
 {
-    printf("left: %s right: %s\n", 
-        DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.left)),
-        DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.right)));
+    const char* bin_type = DecafType_to_string(GET_INFERRED_TYPE(node));
+    const char* left_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.left));
+    const char* right_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.right));
+
+    if (strcmp(bin_type, left_type) != 0) {
+        ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
+            bin_type, left_type, node->source_line);
+        return;
+    } else if (strcmp(bin_type, right_type) != 0) {
+        ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
+            bin_type, right_type, node->source_line);
+        return;
+    }
 }
 
 void AnalysisVisitor_previsit_vardecl (NodeVisitor* visitor, ASTNode* node)
@@ -129,6 +187,10 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
     Symbol* symbol = lookup_symbol(node, node->assignment.location->location.name);
     const char* var_type = DecafType_to_string(symbol->type);
     const char* val_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.value));
+    
+    // printf("here\n");
+    // printf("%s\n", val_type);
+
     if (strcmp(var_type, val_type) != 0) {
         ErrorList_printf(ERROR_LIST, "Type mismatch: %s is incompatible with %s on line %d", 
             var_type, val_type, node->source_line);
@@ -230,25 +292,29 @@ void Analysis_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
 void Analysis_previsit_block (NodeVisitor* visitor, ASTNode* node)
 {
     // repeatedly call previsit_vardecl for the list of vardecls of block node?
+
 }
 
 void AnalysisVisitor_postvisit_block (NodeVisitor* visitor, ASTNode* node)
 {
-    // if (node->block.variables != NULL) {
-    //     ASTNode* curr_var = node->block.variables->head;
-    //     ASTNode* next_var = curr_var->next;
-    //     while (curr_var->next != NULL) {
-    //         while (next_var != NULL) {
-    //             if (strcmp(curr_var->vardecl.name, next_var->vardecl.name) == 0) {
-    //                 // printf("here\n");
-    //                 ErrorList_printf(ERROR_LIST, "Duplicate symbols named '%s' in scope started on line %d",
-    //                     curr_var->vardecl.name, node->source_line);
-    //             }
-    //             next_var = next_var->next;
-    //         }
-    //         curr_var = curr_var->next;
-    //     }
-    // }
+    // get symbol table attribute from node and traverse through table to find duplicates
+    SymbolTable*table = (SymbolTable*) ASTNode_get_attribute(node, "symbolTable");
+
+    // FILE *fp;
+    // fp  = fopen ("data.txt", "w");
+    // symtable_attr_print(table, fp);
+
+    for (Symbol* s = table->local_symbols->head; s != NULL; s = s->next) {
+        for (Symbol* s2 = table->local_symbols->head->next; s2 != NULL; s2 = s2->next) {
+            if (strcmp(s->name, s2->name) == 0) {
+                ErrorList_printf(ERROR_LIST, "Duplicate symbols named '%s' in scope started on line %d",
+                    s->name, node->source_line);
+                SymbolTable_free(table);
+                return;
+            }
+
+        }
+    }
 }
 
 
@@ -289,7 +355,10 @@ ErrorList* analyze (ASTNode* tree)
     v->previsit_program = AnalysisVisitor_check_main;
     v->previsit_literal = Analysis_previsit_literal;
     v->previsit_funcdecl = Analysis_previsit_funcdecl;
+    v->previsit_binaryop = Analysis_previsit_binaryop;
+    v->previsit_unaryop = Analysis_previsit_unaryop;
 
+    v->postvisit_location = Analysis_postvisit_location;
     v->postvisit_conditional = AnalysisVisitor_postvisit_conditional;
     v->postvisit_whileloop = Analysis_postvisit_loop;
     v->postvisit_break = Analysis_postvisit_break;
@@ -298,7 +367,8 @@ ErrorList* analyze (ASTNode* tree)
     v->postvisit_assignment = AnalysisVisitor_postvisit_assignment;
     v->postvisit_block = AnalysisVisitor_postvisit_block;
     v->postvisit_funccall = Analysis_postvisit_funccall;
-    v->postvisit_location = Analysis_postvisit_location;
+    v->postvisit_binaryop = Analysis_postvisit_binaryop;
+    v->postvisit_unaryop = Analysis_postvisit_unaryop;
 
     /* perform analysis, save error list, clean up, and return errors */
     NodeVisitor_traverse(v, tree);
