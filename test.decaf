@@ -1,7 +1,10 @@
 int a; 
 def int main() {
+    int b;
+    b = 5;
     if (true) {
         return 0;
     }
+    
     return 0; 
 }
