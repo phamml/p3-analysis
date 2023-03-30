@@ -35,6 +35,7 @@ TEST_INVALID_MAIN(B_invalid_dup_var_global, "int a; bool b; int a; return 0;")
 TEST_INVALID(B_expr_type_mismatch,    "def int main() { int i; i = true+4; return 0; }")
 TEST_INVALID(B_mismatched_parameters, "def int main() { foo(true, true); return 0; } "
                                       "def void foo(int i, bool b) { return; } ")
+TEST_INVALID(B_funnccall_of_undefinedvar, "def int main(){ a = 3; return add(a, 2);} def int add(int x, int y){ return x + y;}");
 TEST_INVALID(A_invalid_main_var,      "int main; def int foo(int a) { return 0; }")
 
 #endif
@@ -64,6 +65,7 @@ void public_tests (Suite *s)
     TEST(B_invalid_dup_var_global);
     TEST(B_expr_type_mismatch);
     TEST(B_mismatched_parameters);
+    TEST(B_funnccall_of_undefinedvar);
 
     TEST(A_invalid_main_var);
 
