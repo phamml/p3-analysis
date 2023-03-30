@@ -29,6 +29,7 @@ TEST_INVALID_MAIN(C_invalid_break,    "break; return 0;")
 TEST_INVALID(C_array_size_O,          "int sums[0]; def int main() { return 0; }")
 TEST_INVALID(C_return_type_mismatch,  "def int main() { return true; }")
 TEST_INVALID(C_var_type_mismatch,     "int x; def int main() { x=false; return 0; }")
+TEST_INVALID(C_bi_return_type_mismatch,  "def int main() { return 3 < 2; }")
 TEST_INVALID(C_invalid_conditional,   "def int main() { if (1) { return 0; } }")
 TEST_INVALID_MAIN(B_invalid_dup_var_global, "int a; bool b; int a; return 0;")
 TEST_INVALID(B_expr_type_mismatch,    "def int main() { int i; i = true+4; return 0; }")
@@ -54,6 +55,7 @@ void public_tests (Suite *s)
 
     TEST(C_array_size_O);
     TEST(C_return_type_mismatch);
+    TEST(C_bi_return_type_mismatch);
     TEST(C_assign);
     TEST(C_invalid_break);
     TEST(C_var_type_mismatch);
