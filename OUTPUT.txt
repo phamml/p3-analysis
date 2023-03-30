@@ -1,0 +1,141 @@
+Program [line 1]
+SYM TABLE:
+ print_int : (int) -> void
+ print_bool : (bool) -> void
+ print_str : (str) -> void
+ fact : (int) -> int
+ fib : (int) -> int
+ is_prime : (int) -> bool
+ gcd : (int, int) -> int
+ sum_nums : (int) -> int
+ sort_nums : (int) -> void
+ draw_triangle : (int) -> void
+ main : () -> int
+ nums : int [100]
+
+  FuncDecl name="fact" return_type=int parameters={n:int} [line 1]
+  SYM TABLE:
+   n : int
+
+    Block [line 2]
+    SYM TABLE:
+     result : int
+
+        Block [line 5]
+        SYM TABLE:
+
+        Block [line 9]
+        SYM TABLE:
+
+  FuncDecl name="fib" return_type=int parameters={n:int} [line 16]
+  SYM TABLE:
+   n : int
+
+    Block [line 17]
+    SYM TABLE:
+
+        Block [line 19]
+        SYM TABLE:
+
+        Block [line 24]
+        SYM TABLE:
+
+  FuncDecl name="is_prime" return_type=bool parameters={n:int} [line 30]
+  SYM TABLE:
+   n : int
+
+    Block [line 31]
+    SYM TABLE:
+     i : int
+
+        Block [line 35]
+        SYM TABLE:
+
+        Block [line 38]
+        SYM TABLE:
+
+            Block [line 39]
+            SYM TABLE:
+
+  FuncDecl name="gcd" return_type=int parameters={a:int,b:int} [line 47]
+  SYM TABLE:
+   a : int
+   b : int
+
+    Block [line 48]
+    SYM TABLE:
+
+        Block [line 50]
+        SYM TABLE:
+
+  FuncDecl name="sum_nums" return_type=int parameters={len:int} [line 58]
+  SYM TABLE:
+   len : int
+
+    Block [line 59]
+    SYM TABLE:
+     result : int
+     i : int
+
+        Block [line 66]
+        SYM TABLE:
+
+        Block [line 70]
+        SYM TABLE:
+
+  FuncDecl name="sort_nums" return_type=void parameters={len:int} [line 77]
+  SYM TABLE:
+   len : int
+
+    Block [line 78]
+    SYM TABLE:
+     temp : int
+     i : int
+     j : int
+
+        Block [line 87]
+        SYM TABLE:
+
+        Block [line 92]
+        SYM TABLE:
+
+            Block [line 93]
+            SYM TABLE:
+
+                Block [line 94]
+                SYM TABLE:
+
+  FuncDecl name="draw_triangle" return_type=void parameters={base:int} [line 107]
+  SYM TABLE:
+   base : int
+
+    Block [line 108]
+    SYM TABLE:
+     spaces : int
+     levels : int
+     hashes : int
+     count_levels : int
+     count_space : int
+     count_hash : int
+
+        Block [line 117]
+        SYM TABLE:
+
+        Block [line 121]
+        SYM TABLE:
+
+        Block [line 128]
+        SYM TABLE:
+
+            Block [line 133]
+            SYM TABLE:
+
+            Block [line 139]
+            SYM TABLE:
+
+  FuncDecl name="main" return_type=int parameters={} [line 152]
+  SYM TABLE:
+
+    Block [line 153]
+    SYM TABLE:
+

@@ -120,7 +120,7 @@ void ASTNode_set_printable_attribute (ASTNode* node, const char* key, void* valu
 bool ASTNode_has_attribute (ASTNode* node, const char* key)
 {
     if (node == NULL) {
-        Error_throw_printf("ERROR: Tried to get attribute '%s' without a node pointer\n", key);
+        Error_throw_printf("ERROR: Tried to get attribute '%s' without a node pointer on line %d\n", key), node->source_line;
     }
     for (Attribute* a = node->attributes; a != NULL; a = a->next) {
         if (strncmp(key, a->key, MAX_ID_LEN) == 0) {
