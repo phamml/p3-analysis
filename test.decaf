@@ -1,10 +1,30 @@
-int a; 
-def int main() {
-    int b;
-    b = 5;
-    if (true) {
-        return 0;
+def int main() { 
+    int a;
+    return 0;
+} 
+
+def bool is_prime(int n)
+{
+    int i;
+    i = 2;
+    // Checks for numbers < 2 - should not be prime
+    if (n == 0 || n == 1) {
+        return false;
     }
-    
-    return 0; 
+    while (i <= n / 2) {
+        if (n % i == 0) {
+            return false;
+        }
+        i = i + 1;
+    }
+    return true;
+}
+
+def int gcd(int a, int b)
+{
+    // base case
+    if (b == 0) {
+        return a;
+    }
+    return gcd(b, a % b);
 }

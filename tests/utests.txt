@@ -1,3 +1,6 @@
 Running suite(s): Default
-93%: Checks: 15, Failures: 1, Errors: 0
-public.c:30:F:Public:C_return_type_mismatch:0: Assertion 'invalid_program("def int main() { return true; }")' failed
+ERROR: No 'type' attribute
+loop count = 1
+loop count = 2
+95%: Checks: 20, Failures: 0, Errors: 1
+public.c:41:E:Public:B_array_no_access:0: (after this point) Received signal 11 (Segmentation fault)

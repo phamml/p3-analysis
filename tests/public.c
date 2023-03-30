@@ -35,8 +35,15 @@ TEST_INVALID_MAIN(B_invalid_dup_var_global, "int a; bool b; int a; return 0;")
 TEST_INVALID(B_expr_type_mismatch,    "def int main() { int i; i = true+4; return 0; }")
 TEST_INVALID(B_mismatched_parameters, "def int main() { foo(true, true); return 0; } "
                                       "def void foo(int i, bool b) { return; } ")
+
+// Added tests ==============================================================================
 TEST_INVALID(B_funnccall_of_undefinedvar, "def int main(){ a = 3; return add(a, 2);} def int add(int x, int y){ return x + y;}")
 TEST_INVALID(B_array_no_access, "int sums[2]; def int main() { sums = 2; return add(a, 2); }")
+TEST_INVALID(B_invalid_break_double_loop, "int a; def int main() { while (true) { while (true) { int c; break; } } break; return 0; }")
+TEST_INVALID(B_non_global_array, "int a; def int main() { int b[5]; return 0; }")
+
+// ==========================================================================================
+
 TEST_INVALID(A_invalid_main_var,      "int main; def int foo(int a) { return 0; }")
 
 #endif
@@ -68,6 +75,8 @@ void public_tests (Suite *s)
     TEST(B_mismatched_parameters);
     TEST(B_funnccall_of_undefinedvar);
     TEST(B_array_no_access);
+    TEST(B_invalid_break_double_loop);
+    TEST(B_non_global_array);
 
     TEST(A_invalid_main_var);
 
