@@ -272,7 +272,12 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_previsit_location(NodeVisitor* visitor, ASTNode* node)
 {
-    lookup_symbol_with_reporting(visitor, node, node->location.name);
+    Symbol* sym = lookup_symbol_with_reporting(visitor, node, node->location.name);
+
+    // setting inferred type
+    if (sym != NULL) {
+        SET_INFERRED_TYPE(sym->type);
+    }
 }
 
 void AnalysisVisitor_previsit_program (NodeVisitor* visitor, ASTNode* node)
