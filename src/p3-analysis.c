@@ -245,6 +245,25 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
             var_type, val_type, node->source_line);
         return;
     }
+    
+    // CHECKS IF IT IS AN ARRAY SYMBOL
+    if (symbol->symbol_type == ARRAY_SYMBOL) {
+        // check if index exists first
+        if (node->assignment.location->location.index == NULL) {
+
+            ErrorList_printf(ERROR_LIST, "Array '%s' accessed without index on line %d", 
+                node->assignment.location->location.name, node->source_line);
+        } else {
+        // check type of the index
+            const char* ind_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.location->location.index));
+            if (strcmp(ind_type, "int") != 0) {
+                // error if index type is not an int
+                ErrorList_printf(ERROR_LIST, "Index Type mismatch: int expected but %s found on line %d", 
+                    ind_type, node->source_line);
+            }
+        }
+    }
+
 }
 
 void AnalysisVisitor_previsit_location(NodeVisitor* visitor, ASTNode* node)

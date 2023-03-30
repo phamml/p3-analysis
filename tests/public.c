@@ -38,7 +38,7 @@ TEST_INVALID(B_mismatched_parameters, "def int main() { foo(true, true); return 
 
 // Added tests ==============================================================================
 TEST_INVALID(B_funnccall_of_undefinedvar, "def int main(){ a = 3; return add(a, 2);} def int add(int x, int y){ return x + y;}")
-TEST_INVALID(B_array_no_access, "int sums[2]; def int main() { sums = 2; return add(a, 2); }")
+TEST_INVALID(B_array_no_access, "int sums[2]; def int main() { sums = 2; return 0; }")
 TEST_INVALID(B_invalid_break_double_loop, "int a; def int main() { while (true) { while (true) { int c; break; } } break; return 0; }")
 TEST_INVALID(B_non_global_array, "int a; def int main() { int b[5]; return 0; }")
 
