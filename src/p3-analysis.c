@@ -423,8 +423,6 @@ void AnalysisVisitor_postvisit_block (NodeVisitor* visitor, ASTNode* node)
 
 void Analysis_postvisit_return (NodeVisitor* visitor, ASTNode* node) 
 {
-    void Analysis_postvisit_return (NodeVisitor* visitor, ASTNode* node) 
-{
     // getting parent node
     ASTNode* grand = (ASTNode*) ASTNode_get_attribute((ASTNode*) ASTNode_get_attribute(node, "parent"), "parent");
     // getting to funcdecl node.
@@ -442,8 +440,6 @@ void Analysis_postvisit_return (NodeVisitor* visitor, ASTNode* node)
             DecafType_to_string(grand->funcdecl.return_type), DecafType_to_string(GET_INFERRED_TYPE(node->funcreturn.value)), node->source_line);
         }
     }
-}
-
 }
 
 
@@ -486,6 +482,7 @@ ErrorList* analyze (ASTNode* tree)
     v->previsit_funcdecl = Analysis_previsit_funcdecl;
     v->previsit_binaryop = Analysis_previsit_binaryop;
     v->previsit_unaryop = Analysis_previsit_unaryop;
+    v->previsit_funccall = Analysis_previsit_funccall;
 
     v->postvisit_location = Analysis_postvisit_location;
     v->postvisit_conditional = AnalysisVisitor_postvisit_conditional;
