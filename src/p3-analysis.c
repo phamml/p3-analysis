@@ -346,6 +346,19 @@ void Analysis_previsit_funcdecl (NodeVisitor* visitor, ASTNode* node)
     // } 
 }
 
+void Analysis_previsit_funccall (NodeVisitor* visitor, ASTNode* node)
+{
+    Symbol* sym = lookup_symbol(node, node->funccall.name);
+    if (sym == NULL) {
+        ErrorList_printf(ERROR_LIST, "Call to an undefined function");
+
+    }
+
+    SET_INFERRED_TYPE(sym->type);
+
+
+}
+
 void Analysis_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
 {
     const char* param_type = NULL;
@@ -405,8 +418,26 @@ void AnalysisVisitor_postvisit_block (NodeVisitor* visitor, ASTNode* node)
 
 void Analysis_postvisit_return (NodeVisitor* visitor, ASTNode* node) 
 {
-    // ASTNode* grandparent = (ASTNode*) ASTNode_get_attribute((ASTNode*) ASTNode_get_attribute(node, "parent"), "parent");
-    // printf("parent=%d", grandparent->type);
+    void Analysis_postvisit_return (NodeVisitor* visitor, ASTNode* node) 
+{
+    // getting parent node
+    ASTNode* grand = (ASTNode*) ASTNode_get_attribute((ASTNode*) ASTNode_get_attribute(node, "parent"), "parent");
+    // getting to funcdecl node.
+        while (grand->type != FUNCDECL)  {
+
+            grand = (ASTNode*) ASTNode_get_attribute(grand, "parent");
+        }
+    
+    // TO MAKE SURE IT DOES NOT PRINT FOR UNDEFINED VARIABLES WHICH IS HANDLED ELSEWHERE
+    if (ASTNode_has_attribute (node->funcreturn.value, "type"))
+        if (GET_INFERRED_TYPE(node->funcreturn.value) == INT || GET_INFERRED_TYPE(node->funcreturn.value) == BOOL ) {
+    //   Compare the expected and actual return types
+        if (strcmp(DecafType_to_string(grand->funcdecl.return_type), DecafType_to_string(GET_INFERRED_TYPE(node->funcreturn.value))) != 0) {
+            ErrorList_printf(ERROR_LIST, "Type mismatch: '%s' expected but '%s' found on line %d",
+            DecafType_to_string(grand->funcdecl.return_type), DecafType_to_string(GET_INFERRED_TYPE(node->funcreturn.value)), node->source_line);
+        }
+    }
+}
 
 }
 
