@@ -510,7 +510,7 @@ void AnalysisVisitor_postvisit_return (NodeVisitor* visitor, ASTNode* node)
     // to make sure it does not print for undefined variables which is handled elsewhere
     // filters valid void returns
     } else if (node->funcreturn.value != NULL && ASTNode_has_attribute (node->funcreturn.value, "type")) {
-        if (GET_INFERRED_TYPE(node->funcreturn.value) == INT || GET_INFERRED_TYPE(node->funcreturn.value) == BOOL ) {
+        if (GET_INFERRED_TYPE(node->funcreturn.value) == INT || GET_INFERRED_TYPE(node->funcreturn.value) == BOOL || GET_INFERRED_TYPE(node->funcreturn.value) == STR) {
             if (strcmp(DecafType_to_string(grand->funcdecl.return_type), DecafType_to_string(GET_INFERRED_TYPE(node->funcreturn.value))) != 0) {
                 ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
                     DecafType_to_string(grand->funcdecl.return_type), DecafType_to_string(GET_INFERRED_TYPE(node->funcreturn.value)), node->source_line);
