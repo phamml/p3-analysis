@@ -286,17 +286,11 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
         return;
     }
 
-    if (node->assignment.value->type == LOCATION) {
-        Symbol* loc_sym = lookup_symbol(node, node->assignment.value->location.name);
-        if (loc_sym == NULL) {
-            return;
-        }
-    } else if (node->assignment.value->type == FUNCCALL) {
-        Symbol* funccall_sym = lookup_symbol(node, node->assignment.value->funccall.name);
-        if (funccall_sym == NULL) {
-            return;
-        }
+    // undefined loc or funccall check
+    if (check_undefined_loc_funccall(visitor, node->assignment.value)) {
+        return;
     }
+
 
     // check for type mismatch for variables
     const char* var_type = DecafType_to_string(symbol->type);
