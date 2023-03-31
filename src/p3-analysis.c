@@ -107,6 +107,26 @@ void check_duplicates(NodeVisitor* visitor, ASTNode* node)
     }
 }
 
+/* 
+* Helper method for checking undefined location node / function call node.
+*/
+bool check_undefined_loc_funccall (NodeVisitor* visitor, ASTNode* node)
+{
+    if (node->type == LOCATION) {
+        Symbol* loc_sym = lookup_symbol(node, node->location.name);
+        if (loc_sym == NULL) {
+            return true;
+        }
+    } else if (node->type == FUNCCALL) {
+        Symbol* funccall_sym = lookup_symbol(node, node->funccall.name);
+        if (funccall_sym == NULL) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /**
  * Functions for static analysis
  */
