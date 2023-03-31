@@ -1,4 +1,3 @@
 Running suite(s): Default
 ERROR: No 'type' attribute
-95%: Checks: 20, Failures: 0, Errors: 1
-public.c:41:E:Public:B_array_no_access:0: (after this point) Received signal 11 (Segmentation fault)
+100%: Checks: 20, Failures: 0, Errors: 0

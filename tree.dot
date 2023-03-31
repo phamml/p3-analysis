@@ -654,7 +654,19 @@ digraph AST {
 330 -> 331;
 329 [shape=box, label="FuncDecl name='main'\nsymbolTable: (empty)"];
 329 -> 330;
-0 [shape=box, label="Program\nsymbolTable: \n  print_int : (int) -> void\n  print_bool : (bool) -> void\n  print_str : (str) -> void\n  fact : (int) -> int\n  fib : (int) -> int\n  is_prime : (int) -> bool\n  gcd : (int, int) -> int\n  sum_nums : (int) -> int\n  sort_nums : (int) -> void\n  draw_triangle : (int) -> void\n  main : () -> int\n  nums : int [100]"];
+335 [shape=box, label="Return"];
+334 [shape=box, label="Block\nsymbolTable: (empty)"];
+334 -> 335;
+333 [shape=box, label="FuncDecl name='foo'\nsymbolTable: (empty)"];
+333 -> 334;
+339 [shape=box, label="Literal value=1\ntype: int"];
+338 [shape=box, label="Return"];
+338 -> 339;
+337 [shape=box, label="Block\nsymbolTable: (empty)"];
+337 -> 338;
+336 [shape=box, label="FuncDecl name='foo'\nsymbolTable: (empty)"];
+336 -> 337;
+0 [shape=box, label="Program\nsymbolTable: \n  print_int : (int) -> void\n  print_bool : (bool) -> void\n  print_str : (str) -> void\n  fact : (int) -> int\n  fib : (int) -> int\n  is_prime : (int) -> bool\n  gcd : (int, int) -> int\n  sum_nums : (int) -> int\n  sort_nums : (int) -> void\n  draw_triangle : (int) -> void\n  main : () -> int\n  foo : () -> void\n  foo : () -> int\n  nums : int [100]"];
 0 -> 1;
 0 -> 2;
 0 -> 32;
@@ -664,4 +676,6 @@ digraph AST {
 0 -> 149;
 0 -> 227;
 0 -> 329;
+0 -> 333;
+0 -> 336;
 }

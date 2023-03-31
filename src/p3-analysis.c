@@ -88,6 +88,26 @@ Symbol* lookup_symbol_with_reporting(NodeVisitor* visitor, ASTNode* node, const 
 #define GET_INFERRED_TYPE(N) (DecafType)(long)ASTNode_get_attribute(N, "type")
 
 /**
+ * Helper functions
+*/
+
+/**
+ * Traverse through symbol table to check if there are any duplicate symbols
+*/
+void check_duplicates(NodeVisitor* visitor, ASTNode* node)
+{
+    SymbolTable*table = (SymbolTable*) ASTNode_get_attribute(node, "symbolTable");
+    for (Symbol* s = table->local_symbols->head; s != NULL; s = s->next) {
+        for (Symbol* s2 = s->next; s2 != NULL; s2 = s2->next) {
+            if (strcmp(s->name, s2->name) == 0) {
+                ErrorList_printf(ERROR_LIST, "Duplicate symbols named '%s' in scope started on line %d",
+                    s->name, node->source_line);
+            }
+        }
+    }
+}
+
+/**
  * Functions for static analysis
  */
 
@@ -169,6 +189,12 @@ void AnalysisVisitor_postvisit_binaryop (NodeVisitor* visitor, ASTNode* node)
         // left and right child must be type int 
         case EQOP:
         case NEQOP:
+            if (strcmp(left_type, right_type) != 0) {
+                ErrorList_printf(ERROR_LIST, "Type mismatch: %s is incompatible with %s on line %d",
+                    left_type, right_type, node->source_line);
+                return;
+            }
+            break;
         case ADDOP:
         case SUBOP:
         case MULOP:
@@ -295,6 +321,18 @@ void AnalysisVisitor_previsit_program (NodeVisitor* visitor, ASTNode* node)
     }
 }
 
+void AnalysisVisitor_postvisit_program (NodeVisitor* visitor, ASTNode* node)
+{
+    // check that program contains a main function
+    Symbol* symbol = lookup_symbol(node, "main");
+    if (symbol == NULL) {
+        ErrorList_printf(ERROR_LIST, "Program does not contain a 'main' function");
+        return;
+    }
+
+    check_duplicates(visitor, node);
+}
+
 void AnalysisVisitor_postvisit_conditional (NodeVisitor* visitor, ASTNode* node)
 {
     // expression inside if condition must be type bool
@@ -348,6 +386,12 @@ void AnalysisVisitor_previsit_funcdecl (NodeVisitor* visitor, ASTNode* node)
         return;
     }
 }
+
+void AnalysisVisitor_postvisit_funcdecl (NodeVisitor* visitor, ASTNode* node)
+{
+    check_duplicates(visitor, node);
+}
+
 
 void AnalysisVisitor_previsit_funccall (NodeVisitor* visitor, ASTNode* node)
 {
@@ -403,16 +447,7 @@ void AnalysisVisitor_previsit_block (NodeVisitor* visitor, ASTNode* node)
 void AnalysisVisitor_postvisit_block (NodeVisitor* visitor, ASTNode* node)
 {
     // get symbol table attribute from node and traverse through table to find duplicates
-    SymbolTable*table = (SymbolTable*) ASTNode_get_attribute(node, "symbolTable");
-    for (Symbol* s = table->local_symbols->head; s != NULL; s = s->next) {
-        for (Symbol* s2 = s->next; s2 != NULL; s2 = s2->next) {
-            if (strcmp(s->name, s2->name) == 0) {
-                ErrorList_printf(ERROR_LIST, "Duplicate symbols named '%s' in scope started on line %d",
-                    s->name, node->source_line);
-                return;
-            }
-        }
-    }
+    check_duplicates(visitor, node);
 }
 
 void AnalysisVisitor_postvisit_return (NodeVisitor* visitor, ASTNode* node) 
@@ -427,15 +462,14 @@ void AnalysisVisitor_postvisit_return (NodeVisitor* visitor, ASTNode* node)
 
     // checks if function returns void for a non-void funcdecl
     if (node->funcreturn.value == NULL && grand->funcdecl.return_type != VOID) {
-        ErrorList_printf(ERROR_LIST, "Type mismatch: '%s' expected but void found on line %d",
-            DecafType_to_string(grand->funcdecl.return_type), node->source_line);
+        ErrorList_printf(ERROR_LIST, "Invalid void return from non-void function on line %d", node->source_line);
         return;
     // to make sure it does not print for undefined variables which is handled elsewhere
     // filters valid void returns
     } else if (node->funcreturn.value != NULL && ASTNode_has_attribute (node->funcreturn.value, "type")) {
         if (GET_INFERRED_TYPE(node->funcreturn.value) == INT || GET_INFERRED_TYPE(node->funcreturn.value) == BOOL ) {
             if (strcmp(DecafType_to_string(grand->funcdecl.return_type), DecafType_to_string(GET_INFERRED_TYPE(node->funcreturn.value))) != 0) {
-                ErrorList_printf(ERROR_LIST, "Type1 mismatch: '%s' expected but '%s' found on line %d",
+                ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
                     DecafType_to_string(grand->funcdecl.return_type), DecafType_to_string(GET_INFERRED_TYPE(node->funcreturn.value)), node->source_line);
             }
         }
@@ -455,27 +489,28 @@ ErrorList* analyze (ASTNode* tree)
     v->dtor = (Destructor)AnalysisData_free;
 
     /* BOILERPLATE: TODO: register analysis callbacks */
+    v->previsit_program = AnalysisVisitor_previsit_program;
+    v->previsit_funcdecl = AnalysisVisitor_previsit_funcdecl;
     v->previsit_vardecl = AnalysisVisitor_previsit_vardecl;
     v->previsit_location = AnalysisVisitor_previsit_location;
     v->previsit_whileloop = AnalysisVisitor_previsit_loop;
-    v->previsit_program = AnalysisVisitor_previsit_program;
     v->previsit_literal = AnalysisVisitor_previsit_literal;
-    v->previsit_funcdecl = AnalysisVisitor_previsit_funcdecl;
     v->previsit_binaryop = AnalysisVisitor_previsit_binaryop;
     v->previsit_unaryop = AnalysisVisitor_previsit_unaryop;
     v->previsit_funccall = AnalysisVisitor_previsit_funccall;
 
+    v->postvisit_program = AnalysisVisitor_postvisit_program;
+    v->postvisit_funcdecl = AnalysisVisitor_postvisit_funcdecl;
     v->postvisit_location = AnalysisVisitor_postvisit_location;
     v->postvisit_conditional = AnalysisVisitor_postvisit_conditional;
     v->postvisit_whileloop = AnalysisVisitor_postvisit_loop;
-    v->postvisit_break = AnalysisVisitor_postvisit_break;
-    v->postvisit_continue = AnalysisVisitor_postvisit_continue;
-    v->postvisit_binaryop = AnalysisVisitor_postvisit_binaryop;
-    v->postvisit_assignment = AnalysisVisitor_postvisit_assignment;
-    v->postvisit_block = AnalysisVisitor_postvisit_block;
-    v->postvisit_funccall = AnalysisVisitor_postvisit_funccall;
     v->postvisit_binaryop = AnalysisVisitor_postvisit_binaryop;
     v->postvisit_unaryop = AnalysisVisitor_postvisit_unaryop;
+    v->postvisit_funccall = AnalysisVisitor_postvisit_funccall;
+    v->postvisit_break = AnalysisVisitor_postvisit_break;
+    v->postvisit_continue = AnalysisVisitor_postvisit_continue;
+    v->postvisit_assignment = AnalysisVisitor_postvisit_assignment;
+    v->postvisit_block = AnalysisVisitor_postvisit_block;
     v->postvisit_return = AnalysisVisitor_postvisit_return;
 
     /* perform analysis, save error list, clean up, and return errors */
