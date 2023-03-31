@@ -151,6 +151,10 @@ void AnalysisVisitor_previsit_unaryop (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_unaryop (NodeVisitor* visitor, ASTNode* node)
 {
+    if (check_undefined_loc_funccall(visitor, node->unaryop.child)) {
+        return;
+    }   
+    
     const char* bin_type = DecafType_to_string(GET_INFERRED_TYPE(node));
     const char* child_type = DecafType_to_string(GET_INFERRED_TYPE(node->unaryop.child));
 
@@ -188,6 +192,15 @@ void AnalysisVisitor_previsit_binaryop (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_binaryop (NodeVisitor* visitor, ASTNode* node)
 {
+    // checking left side
+    if (check_undefined_loc_funccall(visitor, node->binaryop.left)) {
+        return;
+    }
+
+    // checking right side
+    if (check_undefined_loc_funccall(visitor, node->binaryop.right)) {
+        return;
+    }
     const char* left_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.left));
     const char* right_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.right));
     BinaryOpType op = node->binaryop.operator;
