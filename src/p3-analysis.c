@@ -168,33 +168,31 @@ void AnalysisVisitor_previsit_binaryop (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_binaryop (NodeVisitor* visitor, ASTNode* node)
 {
-    const char* bin_type = DecafType_to_string(GET_INFERRED_TYPE(node));
     const char* left_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.left));
     const char* right_type = DecafType_to_string(GET_INFERRED_TYPE(node->binaryop.right));
     BinaryOpType op = node->binaryop.operator;
     switch (op) {
-        // left and right child must be same type as binary op type
+        // left and right child must be type bool
         case OROP:
         case ANDOP:
             if (strcmp("bool", left_type) != 0) {
-                ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
-                    bin_type, left_type, node->source_line);
-                return;
-            } else if (strcmp("bool", right_type) != 0) {
-                ErrorList_printf(ERROR_LIST, "Type mismatch: %s expected but %s found on line %d",
-                    bin_type, right_type, node->source_line);
-                return;
+                ErrorList_printf(ERROR_LIST, "Type mismatch: bool expected but %s found on line %d",
+                    left_type, node->source_line);
+            }
+            if (strcmp("bool", right_type) != 0) {
+                ErrorList_printf(ERROR_LIST, "Type mismatch: bool expected but %s found on line %d",
+                    right_type, node->source_line);
             }
             break;
-        // left and right child must be type int 
+        // left and right child must be the same type
         case EQOP:
         case NEQOP:
             if (strcmp(left_type, right_type) != 0) {
                 ErrorList_printf(ERROR_LIST, "Type mismatch: %s is incompatible with %s on line %d",
                     left_type, right_type, node->source_line);
-                return;
             }
             break;
+        // left and right child must be type int 
         case ADDOP:
         case SUBOP:
         case MULOP:
@@ -207,11 +205,10 @@ void AnalysisVisitor_postvisit_binaryop (NodeVisitor* visitor, ASTNode* node)
             if (strcmp("int", left_type) != 0) {
                 ErrorList_printf(ERROR_LIST, "Type mismatch: int expected but %s found on line %d",
                     left_type, node->source_line);
-                return;
-            } else if (strcmp("int", right_type) != 0) {
+            }
+            if (strcmp("int", right_type) != 0) {
                 ErrorList_printf(ERROR_LIST, "Type mismatch: int expected but %s found on line %d",
                     right_type, node->source_line);
-                return;
             }
             break;
     }
@@ -249,11 +246,6 @@ void AnalysisVisitor_previsit_vardecl (NodeVisitor* visitor, ASTNode* node)
     }
 }
 
-void AnalysisVisitor_postvisit_vardecl (NodeVisitor* visitor, ASTNode* node)
-{
-    
-}
-
 void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
 {
     Symbol* symbol = lookup_symbol(node, node->assignment.location->location.name);
@@ -267,7 +259,6 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
             return;
         }
     } else if (node->assignment.value->type == FUNCCALL) {
-        // printf("here\n");
         Symbol* funccall_sym = lookup_symbol(node, node->assignment.value->funccall.name);
         if (funccall_sym == NULL) {
             return;
@@ -282,24 +273,6 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
             var_type, val_type, node->source_line);
         return;
     }
-    
-    // // CHECKS IF IT IS AN ARRAY SYMBOL
-    // if (symbol->symbol_type == ARRAY_SYMBOL) {
-    //     // check if index exists first
-    //     if (node->assignment.location->location.index == NULL) {
-    //         ErrorList_printf(ERROR_LIST, "Array '%s' accessed without index on line %d", 
-    //             node->assignment.location->location.name, node->source_line);
-    //     } else {
-    //     // check type of the index
-    //         const char* ind_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.location->location.index));
-    //         if (strcmp(ind_type, "int") != 0) {
-    //             // error if index type is not an int
-    //             ErrorList_printf(ERROR_LIST, "Index Type mismatch: int expected but %s found on line %d", 
-    //                 ind_type, node->source_line);
-    //         }
-    //     }
-    // }
-
 }
 
 void AnalysisVisitor_previsit_location(NodeVisitor* visitor, ASTNode* node)
@@ -319,7 +292,6 @@ void AnalysisVisitor_postvisit_location(NodeVisitor* visitor, ASTNode* node)
     }
 
     if (sym->symbol_type == ARRAY_SYMBOL) {
-        // printf("here\n");
         if (node->location.index == NULL) {
             ErrorList_printf(ERROR_LIST, "Array '%s' accessed without index on line %d", 
                 node->location.name, node->source_line);
@@ -343,11 +315,6 @@ void AnalysisVisitor_postvisit_location(NodeVisitor* visitor, ASTNode* node)
             }
         }
     }
-}
-
-void AnalysisVisitor_previsit_program (NodeVisitor* visitor, ASTNode* node)
-{
-    
 }
 
 void AnalysisVisitor_postvisit_program (NodeVisitor* visitor, ASTNode* node)
@@ -471,11 +438,6 @@ void AnalysisVisitor_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
     }
 }
 
-void AnalysisVisitor_previsit_block (NodeVisitor* visitor, ASTNode* node)
-{
-    // repeatedly call previsit_vardecl for the list of vardecls of block node?
-
-}
 
 void AnalysisVisitor_postvisit_block (NodeVisitor* visitor, ASTNode* node)
 {
@@ -522,7 +484,6 @@ ErrorList* analyze (ASTNode* tree)
     v->dtor = (Destructor)AnalysisData_free;
 
     /* BOILERPLATE: TODO: register analysis callbacks */
-    v->previsit_program = AnalysisVisitor_previsit_program;
     v->previsit_funcdecl = AnalysisVisitor_previsit_funcdecl;
     v->previsit_vardecl = AnalysisVisitor_previsit_vardecl;
     v->previsit_location = AnalysisVisitor_previsit_location;
