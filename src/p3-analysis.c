@@ -291,7 +291,6 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
         return;
     }
 
-
     // check for type mismatch for variables
     const char* var_type = DecafType_to_string(symbol->type);
     const char* val_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.value));
