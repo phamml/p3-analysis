@@ -1,3 +1,4 @@
 Running suite(s): Default
 ERROR: No 'type' attribute
-100%: Checks: 20, Failures: 0, Errors: 0
+95%: Checks: 20, Failures: 1, Errors: 0
+public.c:18:F:Public:C_assign:0: Assertion 'valid_program("def int main () { " "int i; i = 3; return 0;" " }")' failed

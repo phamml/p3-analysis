@@ -42,6 +42,10 @@ TEST_INVALID(B_array_no_access, "int sums[2]; def int main() { sums = 2; return 
 TEST_INVALID(B_invalid_break_double_loop, "int a; def int main() { while (true) { while (true) { int c; break; } } break; return 0; }")
 TEST_INVALID(B_non_global_array, "int a; def int main() { int b[5]; return 0; }")
 
+// checked for duplciate vars and methods at the program level
+// checked for duplicate parameters
+// fixed verifying type for EQ and NEQ
+// 
 // ==========================================================================================
 
 TEST_INVALID(A_invalid_main_var,      "int main; def int foo(int a) { return 0; }")

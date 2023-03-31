@@ -256,16 +256,27 @@ void AnalysisVisitor_postvisit_vardecl (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
 {
-    // check for type mismatch for variables
     Symbol* symbol = lookup_symbol(node, node->assignment.location->location.name);
-
     if (symbol == NULL) {
         return;
     }
 
+    if (node->assignment.value->type == LOCATION) {
+        Symbol* loc_sym = lookup_symbol(node, node->assignment.value->location.name);
+        if (loc_sym == NULL) {
+            return;
+        }
+    } else if (node->assignment.value->type == FUNCCALL) {
+        // printf("here\n");
+        Symbol* funccall_sym = lookup_symbol(node, node->assignment.value->funccall.name);
+        if (funccall_sym == NULL) {
+            return;
+        }
+    }
+
+    // check for type mismatch for variables
     const char* var_type = DecafType_to_string(symbol->type);
     const char* val_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.value));
-
     if (strcmp(var_type, val_type) != 0) {
         ErrorList_printf(ERROR_LIST, "Type mismatch: %s is incompatible with %s on line %d", 
             var_type, val_type, node->source_line);
@@ -276,7 +287,6 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
     if (symbol->symbol_type == ARRAY_SYMBOL) {
         // check if index exists first
         if (node->assignment.location->location.index == NULL) {
-
             ErrorList_printf(ERROR_LIST, "Array '%s' accessed without index on line %d", 
                 node->assignment.location->location.name, node->source_line);
         } else {
@@ -309,6 +319,21 @@ void AnalysisVisitor_postvisit_location(NodeVisitor* visitor, ASTNode* node)
     // if (sym != NULL) {
     //     SET_INFERRED_TYPE(sym->type);
     // }
+
+    if (node->location.index == NULL) {
+        ErrorList_printf(ERROR_LIST, "1Array '%s' accessed without index on line %d", 
+            node->location.name, node->source_line);
+    } else {
+    // check type of the index
+        const char* ind_type = DecafType_to_string(GET_INFERRED_TYPE(node->location.index));
+        if (strcmp(ind_type, "int") != 0) {
+            // error if index type is not an int
+            ErrorList_printf(ERROR_LIST, "Index Type mismatch: int expected but %s found on line %d", 
+                ind_type, node->source_line);
+        }
+    }
+
+
 }
 
 void AnalysisVisitor_previsit_program (NodeVisitor* visitor, ASTNode* node)
@@ -398,6 +423,7 @@ void AnalysisVisitor_previsit_funccall (NodeVisitor* visitor, ASTNode* node)
     Symbol* sym = lookup_symbol(node, node->funccall.name);
     if (sym == NULL) {
         ErrorList_printf(ERROR_LIST, "Call to an undefined function");
+        return;
 
     }
     SET_INFERRED_TYPE(sym->type);
@@ -421,7 +447,7 @@ void AnalysisVisitor_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
     // check for type mismatches in args passed to funncall
     while (curr_arg != NULL) {
         if (curr_param == NULL) {
-            printf("here\n");
+            // printf("here\n");
             return;
         }
         param_type = DecafType_to_string(curr_param->type);
