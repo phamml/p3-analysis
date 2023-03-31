@@ -420,6 +420,13 @@ void AnalysisVisitor_previsit_funcdecl (NodeVisitor* visitor, ASTNode* node)
         ErrorList_printf(ERROR_LIST, "'main' must take no parameters");
         return;
     }
+
+     // checks that main returns an int
+    if (strcmp(node->funcdecl.name, "main") == 0 && node->funcdecl.return_type != INT) {
+        ErrorList_printf(ERROR_LIST, "'main' must return an integer");
+        return;
+    }
+
 }
 
 void AnalysisVisitor_postvisit_funcdecl (NodeVisitor* visitor, ASTNode* node)
