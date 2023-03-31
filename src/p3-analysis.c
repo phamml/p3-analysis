@@ -422,15 +422,21 @@ void AnalysisVisitor_previsit_funccall (NodeVisitor* visitor, ASTNode* node)
 {
     Symbol* sym = lookup_symbol(node, node->funccall.name);
     if (sym == NULL) {
-        ErrorList_printf(ERROR_LIST, "Call to an undefined function");
-        return;
-
+       return;
     }
-    SET_INFERRED_TYPE(sym->type);
+    
+   SET_INFERRED_TYPE(sym->type);
 }
 
 void AnalysisVisitor_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
 {
+    
+    Symbol* sym = lookup_symbol(node, node->funccall.name);
+    if (sym == NULL) {
+        ErrorList_printf(ERROR_LIST, "Symbol %s undefined on line %d ", node->funccall.name, node->source_line);
+        return;
+
+    }
     const char* param_type = NULL;
     const char* arg_type = NULL;
     ASTNode* curr_arg = node->funccall.arguments->head;
