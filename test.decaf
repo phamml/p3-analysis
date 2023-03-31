@@ -1,14 +1,7 @@
 def int main()
 {
     int a;
-    a = hi + hi;
-    nums[200] = 0;
-    if (7 == 3) {
-        return 9;
-    }
-
-    nums = sums;
-    return 0;
+    return op;
 }
 
 int nums[100];

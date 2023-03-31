@@ -417,11 +417,9 @@ void AnalysisVisitor_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
         ErrorList_printf(ERROR_LIST, "Invalid number of function arguments on line %d", node->source_line);
         return;
     }
-
     // check for type mismatches in args passed to funncall
     while (curr_arg != NULL) {
         if (curr_param == NULL) {
-            // printf("here\n");
             return;
         }
         param_type = DecafType_to_string(curr_param->type);
