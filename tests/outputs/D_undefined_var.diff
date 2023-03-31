@@ -1,5 +1,0 @@
---- outputs/D_undefined_var.txt	2023-03-31 10:48:11.537829612 -0400
-+++ expected/D_undefined_var.txt	2023-03-26 20:00:58.263153733 -0400
-@@ -1,2 +1 @@
- Symbol 'a' undefined on line 3
--1Array 'a' accessed without index on line 3

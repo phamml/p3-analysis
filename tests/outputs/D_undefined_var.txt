@@ -1,2 +1,1 @@
 Symbol 'a' undefined on line 3
-1Array 'a' accessed without index on line 3

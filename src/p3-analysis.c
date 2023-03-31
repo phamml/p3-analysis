@@ -283,28 +283,28 @@ void AnalysisVisitor_postvisit_assignment (NodeVisitor* visitor, ASTNode* node)
         return;
     }
     
-    // CHECKS IF IT IS AN ARRAY SYMBOL
-    if (symbol->symbol_type == ARRAY_SYMBOL) {
-        // check if index exists first
-        if (node->assignment.location->location.index == NULL) {
-            ErrorList_printf(ERROR_LIST, "Array '%s' accessed without index on line %d", 
-                node->assignment.location->location.name, node->source_line);
-        } else {
-        // check type of the index
-            const char* ind_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.location->location.index));
-            if (strcmp(ind_type, "int") != 0) {
-                // error if index type is not an int
-                ErrorList_printf(ERROR_LIST, "Index Type mismatch: int expected but %s found on line %d", 
-                    ind_type, node->source_line);
-            }
-        }
-    }
+    // // CHECKS IF IT IS AN ARRAY SYMBOL
+    // if (symbol->symbol_type == ARRAY_SYMBOL) {
+    //     // check if index exists first
+    //     if (node->assignment.location->location.index == NULL) {
+    //         ErrorList_printf(ERROR_LIST, "Array '%s' accessed without index on line %d", 
+    //             node->assignment.location->location.name, node->source_line);
+    //     } else {
+    //     // check type of the index
+    //         const char* ind_type = DecafType_to_string(GET_INFERRED_TYPE(node->assignment.location->location.index));
+    //         if (strcmp(ind_type, "int") != 0) {
+    //             // error if index type is not an int
+    //             ErrorList_printf(ERROR_LIST, "Index Type mismatch: int expected but %s found on line %d", 
+    //                 ind_type, node->source_line);
+    //         }
+    //     }
+    // }
 
 }
 
 void AnalysisVisitor_previsit_location(NodeVisitor* visitor, ASTNode* node)
 {
-    Symbol* sym = lookup_symbol_with_reporting(visitor, node, node->location.name);
+    Symbol* sym = lookup_symbol(node, node->location.name);
     if (sym == NULL) {
         return;
     }
@@ -313,37 +313,41 @@ void AnalysisVisitor_previsit_location(NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_location(NodeVisitor* visitor, ASTNode* node)
 {
-    // Symbol* sym = lookup_symbol_with_reporting(visitor, node, node->location.name);
-
-    // // setting inferred type
-    // if (sym != NULL) {
-    //     SET_INFERRED_TYPE(sym->type);
-    // }
-
-    if (node->location.index == NULL) {
-        ErrorList_printf(ERROR_LIST, "1Array '%s' accessed without index on line %d", 
-            node->location.name, node->source_line);
-    } else {
-    // check type of the index
-        const char* ind_type = DecafType_to_string(GET_INFERRED_TYPE(node->location.index));
-        if (strcmp(ind_type, "int") != 0) {
-            // error if index type is not an int
-            ErrorList_printf(ERROR_LIST, "Index Type mismatch: int expected but %s found on line %d", 
-                ind_type, node->source_line);
-        }
+    Symbol* sym = lookup_symbol_with_reporting(visitor, node, node->location.name);
+    if (sym == NULL) {
+        return;
     }
 
-
+    if (sym->symbol_type == ARRAY_SYMBOL) {
+        // printf("here\n");
+        if (node->location.index == NULL) {
+            ErrorList_printf(ERROR_LIST, "Array '%s' accessed without index on line %d", 
+                node->location.name, node->source_line);
+        } else if (node->location.index->type == LOCATION) {
+            Symbol* loc_sym = lookup_symbol_with_reporting(visitor, node, node->location.name);
+            if (loc_sym == NULL) {
+                return;
+            }
+        } else if (node->location.index->type == FUNCCALL) {
+            Symbol* funccal_sym = lookup_symbol_with_reporting(visitor, node, node->location.name);
+            if (funccal_sym == NULL) {
+                return;
+            }
+        } else {
+        // check type of the index
+            const char* ind_type = DecafType_to_string(GET_INFERRED_TYPE(node->location.index));
+            if (strcmp(ind_type, "int") != 0) {
+                // error if index type is not an int
+                ErrorList_printf(ERROR_LIST, "Index Type mismatch: int expected but %s found on line %d for node %s", 
+                    ind_type, node->source_line, node->location.name);
+            }
+        }
+    }
 }
 
 void AnalysisVisitor_previsit_program (NodeVisitor* visitor, ASTNode* node)
 {
-    // check that program contains a main function
-    Symbol* symbol = lookup_symbol(node, "main");
-    if (symbol == NULL) {
-        ErrorList_printf(ERROR_LIST, "Program does not contain a 'main' function");
-        return;
-    }
+    
 }
 
 void AnalysisVisitor_postvisit_program (NodeVisitor* visitor, ASTNode* node)
@@ -430,12 +434,9 @@ void AnalysisVisitor_previsit_funccall (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
 {
-    
-    Symbol* sym = lookup_symbol(node, node->funccall.name);
+    Symbol* sym = lookup_symbol_with_reporting(visitor, node, node->funccall.name);
     if (sym == NULL) {
-        ErrorList_printf(ERROR_LIST, "Symbol %s undefined on line %d ", node->funccall.name, node->source_line);
         return;
-
     }
     const char* param_type = NULL;
     const char* arg_type = NULL;

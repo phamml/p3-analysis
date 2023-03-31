@@ -1,1 +1,25 @@
-def int main () { int i; i = 3; return 0; }
+def int main()
+{
+    int a;
+    a = c;
+    nums[add(4,5)] = 0;
+    if (7 == 3) {
+        return 9;
+    }
+
+    nums = sums;
+    return 0;
+}
+
+int nums[100];
+int sums[6];
+
+
+
+def int foo(int n)
+{
+    int b;
+    b = 6;
+    nums[9] = 7;
+    return 1;
+}

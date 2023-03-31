@@ -1,16 +1,28 @@
-==885708== Memcheck, a memory error detector
-==885708== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==885708== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
-==885708== Command: ../decaf inputs/add.decaf
-==885708== 
-1Array 'a' accessed without index on line 4
-1Array 'a' accessed without index on line 5
-==885708== 
-==885708== HEAP SUMMARY:
-==885708==     in use at exit: 0 bytes in 0 blocks
-==885708==   total heap usage: 1,791 allocs, 1,791 frees, 209,560 bytes allocated
-==885708== 
-==885708== All heap blocks were freed -- no leaks are possible
-==885708== 
-==885708== For lists of detected and suppressed errors, rerun with: -s
-==885708== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==942973== Memcheck, a memory error detector
+==942973== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==942973== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==942973== Command: ../decaf inputs/add.decaf
+==942973== 
+Program [line 1]
+SYM TABLE:
+ print_int : (int) -> void
+ print_bool : (bool) -> void
+ print_str : (str) -> void
+ main : () -> int
+
+  FuncDecl name="main" return_type=int parameters={} [line 1]
+  SYM TABLE:
+
+    Block [line 2]
+    SYM TABLE:
+     a : int
+
+==942973== 
+==942973== HEAP SUMMARY:
+==942973==     in use at exit: 0 bytes in 0 blocks
+==942973==   total heap usage: 1,790 allocs, 1,790 frees, 209,312 bytes allocated
+==942973== 
+==942973== All heap blocks were freed -- no leaks are possible
+==942973== 
+==942973== For lists of detected and suppressed errors, rerun with: -s
+==942973== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
