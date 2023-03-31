@@ -154,7 +154,7 @@ void AnalysisVisitor_postvisit_unaryop (NodeVisitor* visitor, ASTNode* node)
     if (check_undefined_loc_funccall(visitor, node->unaryop.child)) {
         return;
     }   
-    
+
     const char* bin_type = DecafType_to_string(GET_INFERRED_TYPE(node));
     const char* child_type = DecafType_to_string(GET_INFERRED_TYPE(node->unaryop.child));
 
@@ -364,6 +364,9 @@ void AnalysisVisitor_postvisit_program (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_conditional (NodeVisitor* visitor, ASTNode* node)
 {
+    if (check_undefined_loc_funccall(visitor, node->conditional.condition)) {
+        return;
+    }
     // expression inside if condition must be type bool
     const char* cond_type = DecafType_to_string(GET_INFERRED_TYPE(node->conditional.condition));
     if (strcmp(cond_type, "bool") != 0) {
@@ -379,6 +382,9 @@ void AnalysisVisitor_previsit_loop (NodeVisitor* visitor, ASTNode* node)
 
 void AnalysisVisitor_postvisit_loop (NodeVisitor* visitor, ASTNode* node)
 {
+    if (check_undefined_loc_funccall(visitor, node->whileloop.condition)) {
+        return;
+    }
     DATA->loop_count--;
     // expression inside while condition must be type bool
     const char* cond_type = DecafType_to_string(GET_INFERRED_TYPE(node->whileloop.condition));
