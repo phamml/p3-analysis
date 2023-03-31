@@ -405,6 +405,11 @@ void AnalysisVisitor_postvisit_funccall (NodeVisitor* visitor, ASTNode* node)
     if (sym == NULL) {
         return;
     }
+
+    if (sym->symbol_type != FUNCTION_SYMBOL) {
+        ErrorList_printf(ERROR_LIST, "Invalid call to non-function '%s' on line %d", node->funccall.name, node->source_line);
+        return;
+    }
     const char* param_type = NULL;
     const char* arg_type = NULL;
     ASTNode* curr_arg = node->funccall.arguments->head;

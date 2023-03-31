@@ -1,7 +1,7 @@
 def int main()
 {
-    int a;
-    return op;
+    int main;
+    return 0;
 }
 
 int nums[100];
@@ -9,10 +9,10 @@ int sums[6];
 
 
 
-def int foo(int n)
+def int foo()
 {
-    int b;
-    b = 6;
-    nums[9] = 7;
-    return 1;
+    int foo;
+    foo = 9;
+
+    foo();
 }
