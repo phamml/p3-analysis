@@ -1,18 +1,159 @@
-def int main()
+// CS 432 PROJECT 0: DECAF PROGRAMMING
+// By: Mia Pham
+// Date: 01-27-2023
+
+def int fact(int n)
 {
-    int main;
-    return 0;
+    int result;
+    result = 1;
+    if (n == 0) {
+        return 0;
+    }
+
+    while (n >= 1) {
+        result = result * n;
+        n = n - 1;
+    }
+    return result;
+}
+
+def int fib(int n)
+{
+    // base case 1
+    if (n == 0) {
+        return 0;
+    } 
+    
+    // base case 2
+    if ( n == 1) {
+        return 1;
+    }
+    return fib(n - 1) + fib(n-2);
+}
+
+def bool is_prime(int n)
+{
+    int i;
+    i = 2;
+    // Checks for numbers < 2 - should not be prime
+    if (n == 0 || n == 1) {
+        return false;
+    }
+    while (i <= n / 2) {
+        if (n % i == 0) {
+            return false;
+        }
+        i = i + 1;
+    }
+    return true;
+}
+
+def int gcd(int a, int b)
+{
+    // base case
+    if (b == 0) {
+        return a;
+    }
+    return gcd(b, a % b);
 }
 
 int nums[100];
-int sums[6];
 
-
-
-def int foo()
+def int sum_nums(int len)
 {
-    int foo;
-    foo = 9;
+    int result;
+    int i;
+    result = 0;
+    i = 0;
 
-    foo();
+    // If given len is > 100 (array size) -> reset len = 100
+    if (len > 100) {
+        len = 100;
+    }
+
+    while (i < len) {
+        result = result + nums[i];
+        i = i + 1;
+    }
+    return result;
+}
+
+def void sort_nums(int len)
+{
+    int temp;
+    int i;
+    int j;
+    temp = 0;
+    i = 0;
+    j = 0;
+
+    // If given len is > 100 (array size) -> reset len = 100
+    if (len > 100) {
+        len = 100;
+    }
+
+    // Bubble sort
+    while (i < len - 1) {
+        while (j < len - i - 1) {
+            if (nums[j] > nums[j + 1]) {
+                temp = nums[j];
+                nums[j] = nums[j + 1];
+                nums[j + 1] = temp;              
+            }
+            j = j + 1;
+        }
+        i = i + 1;
+        j = 0;
+    }
+    return;
+}
+
+def void draw_triangle(int base)
+{
+    int spaces;
+    int levels;
+    int hashes;
+    int count_levels;
+    int count_space;
+    int count_hash;
+
+    // Sets levels, spaces, and hashes values based on if base is even or not
+    if (base % 2 == 0) {
+        levels = base / 2;
+        spaces = (base / 2) - 1;
+        hashes = 2;
+    } else {
+        levels = (base / 2) + 1;
+        spaces = base / 2;
+        hashes = 1;
+    }
+
+    count_levels = 1;
+    while (count_levels <= levels) {
+        count_space = 1;
+        count_hash = 1;
+
+        // Prints spaces
+        while (count_space <= spaces) {
+            print_str(" ");
+            count_space = count_space + 1;
+        }
+
+        // Prints hashes
+        while (count_hash <= hashes) {
+            print_str("#");
+            count_hash = count_hash + 1;
+        }
+
+        print_str("\n");
+        count_levels = count_levels + 1;
+        spaces = spaces - 1;
+        hashes = hashes + 2;
+    }
+    return;
+}
+
+def int main()
+{
+    return 0;
 }

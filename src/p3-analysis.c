@@ -425,7 +425,6 @@ void AnalysisVisitor_previsit_funcdecl (NodeVisitor* visitor, ASTNode* node)
         ErrorList_printf(ERROR_LIST, "'main' must return an integer");
         return;
     }
-
 }
 
 void AnalysisVisitor_postvisit_funcdecl (NodeVisitor* visitor, ASTNode* node)
